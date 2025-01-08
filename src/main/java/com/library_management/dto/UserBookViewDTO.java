@@ -22,6 +22,19 @@ public class UserBookViewDTO {
 
     private String status;
 
+    public UserBookViewDTO(String id, String user_name, String email, String author, String book_name,
+            String description, Integer no_of_sets, LocalDateTime submission_date, String status) {
+        this.id = id;
+        this.user_name = user_name;
+        this.email = email;
+        this.author = author;
+        this.book_name = book_name;
+        this.description = description;
+        this.no_of_sets = no_of_sets;
+        this.submission_date = submission_date;
+        this.status = status;
+    }
+
     public String getId() {
         return id;
     }

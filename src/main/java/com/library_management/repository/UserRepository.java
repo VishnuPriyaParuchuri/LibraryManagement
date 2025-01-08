@@ -23,7 +23,20 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
     @Query("SELECT u FROM UserEntity u WHERE u.email IN :emails")
     List<UserEntity> findUsersByEmails(@Param("emails") List<String> emails);
 
-    @Query("SELECT u FROM fetch_view_user_book u WHERE u.id = :id")
+    @Query(value = """
+            SELECT
+            id,
+            user_name,
+            email,
+            author,
+            book_name,
+            description,
+            no_of_sets,
+            submission_date,
+            status
+            FROM fetch_view_user_book
+            WHERE id = :id
+            """, nativeQuery = true)
     List<UserBookViewDTO> findUserBooksById(@Param("id") String id);
 
 }
