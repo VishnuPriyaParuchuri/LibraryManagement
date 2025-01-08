@@ -21,8 +21,8 @@ public interface AdminService {
 
     ResponseEntity<?> deleteUser(HttpServletRequest req, HttpServletResponse res, String id);
 
-    ResponseEntity<?> uploadUsersData(HttpServletRequest req, HttpServletResponse res, MultipartFile file);
+    ResponseEntity<?> uploadUsersData(HttpServletRequest req, HttpServletResponse res, MultipartFile file, UserInfoDTO userDetails);
 
-    ResponseEntity<?> fetchUserBooks(HttpServletRequest req, HttpServletResponse res, UserInfoDTO userDetails);
+    ResponseEntity<?> fetchUserBooksByUserId(HttpServletRequest req, HttpServletResponse res, UserInfoDTO userDetails);
 
 }

@@ -65,16 +65,16 @@ public class AdminController {
     public ResponseEntity<?> uploadUserData(HttpServletRequest req,
             HttpServletResponse res,
             @RequestParam("file") MultipartFile file) {
-
-        return adminService.uploadUsersData(req, res, file);
+        UserInfoDTO userDetails = (UserInfoDTO) req.getAttribute("user");
+        return adminService.uploadUsersData(req, res, file, userDetails);
     }
 
     @GetMapping("/get/user/books")
     @PreAuthorize("hasRole('ROLE_ADMIN')or hasRole('ROLE_STUDENT')")
-    public ResponseEntity<?> fetchUserBooks(HttpServletRequest req, HttpServletResponse res) {
+    public ResponseEntity<?> fetchUserBooksByUserId(HttpServletRequest req, HttpServletResponse res) {
         UserInfoDTO userDetails = (UserInfoDTO) req.getAttribute("user");
 
-        return adminService.fetchUserBooks(req, res, userDetails);
+        return adminService.fetchUserBooksByUserId(req, res, userDetails);
     }
 
 }

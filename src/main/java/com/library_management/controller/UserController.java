@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.library_management.entity.BookEntity;
 import com.library_management.services.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,7 +27,7 @@ public class UserController {
     }
 
     @GetMapping("/get/all/books")
-    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    @PreAuthorize("hasRole('ROLE_STUDENT')or hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> getAllBokks(HttpServletRequest req, HttpServletResponse res) {
 
         return userService.getAllBooks(req, res);
