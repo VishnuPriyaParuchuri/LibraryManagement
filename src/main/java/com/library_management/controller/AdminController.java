@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.library_management.dto.UserBookViewDTO;
 import com.library_management.dto.UserInfoDTO;
 import com.library_management.dto.UserServiceDTO;
 import com.library_management.services.AdminService;
@@ -31,7 +32,7 @@ public class AdminController {
     public ResponseEntity<?> uploadBooksData(HttpServletRequest req, HttpServletResponse res,
             @RequestParam("file") MultipartFile file) {
 
-                UserInfoDTO userDetails = (UserInfoDTO) req.getAttribute("user");
+        UserInfoDTO userDetails = (UserInfoDTO) req.getAttribute("user");
 
         return adminService.uploadBooksData(req, res, file, userDetails);
     }
@@ -69,5 +70,12 @@ public class AdminController {
         return adminService.uploadUsersData(req, res, file);
     }
 
+    @GetMapping("/get/user/books")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> fetchUserBooks(HttpServletRequest req, HttpServletResponse res) {
+        UserInfoDTO userDetails = (UserInfoDTO) req.getAttribute("user");
+
+        return adminService.fetchUserBooks(req, res, userDetails);
+    }
 
 }

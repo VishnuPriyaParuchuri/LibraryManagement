@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.library_management.dto.UserBookViewDTO;
 import com.library_management.entity.UserEntity;
 
 @Repository
@@ -21,5 +22,8 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
 
     @Query("SELECT u FROM UserEntity u WHERE u.email IN :emails")
     List<UserEntity> findUsersByEmails(@Param("emails") List<String> emails);
+
+    @Query("SELECT u FROM fetch_view_user_book u WHERE u.id = :id")
+    List<UserBookViewDTO> findUserBooksById(@Param("id") String id);
 
 }

@@ -37,6 +37,7 @@ public class StudentBookEntity {
     @Column(name = "CREATED_BY")
     private String createdBy;
 
+    
     @Column(name = "UPDATED_AT")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy'T'HH:mm:ss")
     private LocalDateTime updatedAt;

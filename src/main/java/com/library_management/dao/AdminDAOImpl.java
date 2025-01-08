@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import com.library_management.dto.UserBookViewDTO;
 import com.library_management.dto.UserInfoDTO;
 import com.library_management.dto.UserServiceDTO;
 import com.library_management.entity.BookEntity;
@@ -144,6 +145,13 @@ public class AdminDAOImpl implements AdminDAO {
             // empty list)
             return new ArrayList<>();
         }
+    }
+
+    @Override
+    public List<UserBookViewDTO> getUserBooksById(String id) {
+        // TODO Auto-generated method stub
+
+        return userRepository.findUserBooksById(id);
     }
 
 }

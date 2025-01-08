@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import com.library_management.dto.UserBookViewDTO;
 import com.library_management.dto.UserInfoDTO;
 import com.library_management.dto.UserServiceDTO;
 import com.library_management.entity.BookEntity;
@@ -26,5 +27,7 @@ public interface AdminDAO {
     List<UserEntity> getExisitingUsers(List<String> emails);
 
     List<UserEntity> uploadUserInfo(List<UserEntity> users);
+
+    List<UserBookViewDTO> getUserBooksById(String id);
 
 }
