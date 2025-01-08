@@ -23,4 +23,6 @@ public interface AdminService {
 
     ResponseEntity<?> uploadUsersData(HttpServletRequest req, HttpServletResponse res, MultipartFile file);
 
+    ResponseEntity<?> fetchUserBooks(HttpServletRequest req, HttpServletResponse res, UserInfoDTO userDetails);
+
 }

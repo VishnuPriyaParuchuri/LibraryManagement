@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.library_management.dao.AdminDAO;
+import com.library_management.dto.UserBookViewDTO;
 import com.library_management.dto.UserInfoDTO;
 import com.library_management.dto.UserServiceDTO;
 import com.library_management.utill.Utills;
@@ -503,6 +504,40 @@ public class AdminServiceImpl implements AdminService {
         }
         System.out.println(user.getUserName());
         return user;
+    }
+
+    @Override
+    public ResponseEntity<?> fetchUserBooks(HttpServletRequest req, HttpServletResponse res, UserInfoDTO userDetails) {
+        // TODO Auto-generated method stub
+
+        try {
+
+            if (userDetails.getId().isEmpty()) {
+
+                String errorMessages = "Id is required!";
+
+                CustomResponse<String> responseBody = new CustomResponse<>(errorMessages, "BAD_REQUEST",
+                        HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+            }
+
+            List<UserBookViewDTO> getUserBooks = adminDAO.getUserBooksById(userDetails.getId());
+
+            CustomResponse<?> responseBody = new CustomResponse<>(getUserBooks, "SUCCESS",
+                    HttpStatus.OK.value(),
+                    req.getRequestURI(), LocalDateTime.now());
+
+            return new ResponseEntity<>(responseBody, HttpStatus.OK);
+
+        } catch (Exception e) {
+
+            CustomResponse<String> responseBody = new CustomResponse<>(e.getMessage(),
+                    "BAD_REQUEST",
+                    HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+            return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+
+        }
     }
 
 }
