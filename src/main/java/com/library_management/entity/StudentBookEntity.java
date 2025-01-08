@@ -12,6 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -37,7 +38,6 @@ public class StudentBookEntity {
     @Column(name = "CREATED_BY")
     private String createdBy;
 
-    
     @Column(name = "UPDATED_AT")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy'T'HH:mm:ss")
     private LocalDateTime updatedAt;
@@ -45,13 +45,13 @@ public class StudentBookEntity {
     @Column(name = "UPDATED_BY")
     private String updatedBy;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "USER_ID", referencedColumnName = "id", nullable = false)
-    private List<UserEntity> user;
+    private UserEntity user;
 
     @ManyToOne
     @JoinColumn(name = "BOOK_ID", referencedColumnName = "id", nullable = false)
-    private List<BookEntity> book;
+    private BookEntity book;
 
     public StudentBookEntity() {
 
@@ -113,19 +113,19 @@ public class StudentBookEntity {
         this.updatedBy = updatedBy;
     }
 
-    public List<UserEntity> getUser() {
+    public UserEntity getUser() {
         return user;
     }
 
-    public void setUser(List<UserEntity> user) {
+    public void setUser(UserEntity user) {
         this.user = user;
     }
 
-    public List<BookEntity> getBook() {
+    public BookEntity getBook() {
         return book;
     }
 
-    public void setBook(List<BookEntity> book) {
+    public void setBook(BookEntity book) {
         this.book = book;
     }
 
