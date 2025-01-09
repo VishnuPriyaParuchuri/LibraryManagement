@@ -39,4 +39,21 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
             """, nativeQuery = true)
     List<UserBookViewDTO> findUserBooksById(@Param("id") String id);
 
+    @Query(value = """
+            SELECT
+            id,
+            user_name,
+            email,
+            bookId,
+            author,
+            book_name,
+            description,
+            no_of_sets,
+            submission_date,
+            status
+            FROM fetch_view_user_book
+            WHERE bookId = :bookId
+            """, nativeQuery = true)
+    Page<UserBookViewDTO> findUserBooksByBookId(@Param("bookId") String bookId, Pageable pageable);
+
 }

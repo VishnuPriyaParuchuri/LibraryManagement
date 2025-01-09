@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.library_management.dto.BookServiceDTO;
+import com.library_management.dto.UserBookViewDTO;
 import com.library_management.dto.UserInfoDTO;
 import com.library_management.dto.UserServiceDTO;
 import com.library_management.services.AdminService;
@@ -77,4 +79,11 @@ public class AdminController {
         return adminService.fetchUserBooksByUserId(req, res, userDetails);
     }
 
+    @GetMapping("/user/book/id")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> fetchUserBooksByBookId(HttpServletRequest req, HttpServletResponse res,
+            @RequestBody BookServiceDTO bookServiceDTO, @RequestParam int page, @RequestParam int size) {
+
+        return adminService.fetchUserBooksByBookId(req, res, bookServiceDTO, page, size);
+    }
 }

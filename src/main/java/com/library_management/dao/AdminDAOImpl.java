@@ -154,4 +154,11 @@ public class AdminDAOImpl implements AdminDAO {
         return userRepository.findUserBooksById(id);
     }
 
+    @Override
+    public Page<UserBookViewDTO> getUserBooksInfoByBookId(String id, Pageable pageable) {
+        // TODO Auto-generated method stub
+
+        return userRepository.findUserBooksByBookId(id, pageable);
+    }
+
 }
