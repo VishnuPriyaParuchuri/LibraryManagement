@@ -1,14 +1,13 @@
 package com.library_management.services;
 
+import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.Random;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -25,18 +24,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.library_management.config.CustomResponse;
 import com.library_management.dao.AdminDAO;
 import com.library_management.dto.UserBookViewDTO;
 import com.library_management.dto.UserInfoDTO;
 import com.library_management.dto.UserServiceDTO;
+import com.library_management.entity.BookEntity;
+import com.library_management.entity.UserEntity;
 import com.library_management.utill.Utills;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import com.library_management.config.CustomResponse;
-import com.library_management.entity.BookEntity;
-import com.library_management.entity.UserEntity;
 
 @Service
 public class AdminServiceImpl implements AdminService {
@@ -155,6 +153,13 @@ public class AdminServiceImpl implements AdminService {
             book.setDescription(descriptionCell.getStringCellValue().trim());
         } else {
             throw new IllegalArgumentException("Please enter the field description at row " + (row.getRowNum() + 1));
+        }
+
+        Cell noOFSetsCell = row.getCell(3);
+        if (noOFSetsCell != null && noOFSetsCell.getCellType() == CellType.NUMERIC) {
+            book.setNoOfSets((int) noOFSetsCell.getNumericCellValue());
+        } else {
+            throw new IllegalArgumentException("Please enter the field no of sets at row " + (row.getRowNum() + 1));
         }
 
         book.setCreatedAt(LocalDateTime.now());
@@ -281,7 +286,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public ResponseEntity<?> uploadUsersData(HttpServletRequest req,
-            HttpServletResponse res, MultipartFile file) {
+            HttpServletResponse res, MultipartFile file, UserInfoDTO userDetails) {
 
         try {
             if (file.isEmpty()) {
@@ -296,8 +301,8 @@ public class AdminServiceImpl implements AdminService {
 
             }
 
-            if (!file.getOriginalFilename().endsWith(".xls") &&
-                    !file.getOriginalFilename().endsWith(".xlsx")) {
+            if (!file.getOriginalFilename().endsWith(".xls")
+                    && !file.getOriginalFilename().endsWith(".xlsx")) {
                 String errorMessage = "Invalid file type! Please upload a valid Excel file.";
                 CustomResponse<String> responseBody = new CustomResponse<>(errorMessage,
                         "BAD_REQUEST",
@@ -323,7 +328,7 @@ public class AdminServiceImpl implements AdminService {
                     if (isRowEmpty(row)) {
                         continue;
                     }
-                    UserEntity user = validateParseRow(row);
+                    UserEntity user = validateParseRow(row, userDetails);
                     users.add(user);
                 }
 
@@ -381,10 +386,10 @@ public class AdminServiceImpl implements AdminService {
                 "country", "state", "dob");
         for (int i = 0; i < requiredHeaders.size(); i++) {
             Cell cell = headerRow.getCell(i);
-            if (cell == null ||
-                    !requiredHeaders.get(i).equalsIgnoreCase(cell.getStringCellValue().trim())) {
-                throw new IllegalArgumentException("Invalid column name: " +
-                        requiredHeaders.get(i));
+            if (cell == null
+                    || !requiredHeaders.get(i).equalsIgnoreCase(cell.getStringCellValue().trim())) {
+                throw new IllegalArgumentException("Invalid column name: "
+                        + requiredHeaders.get(i));
             }
         }
     }
@@ -404,12 +409,11 @@ public class AdminServiceImpl implements AdminService {
         return true;
     }
 
-    private UserEntity validateParseRow(Row row) {
+    private UserEntity validateParseRow(Row row, UserInfoDTO userDetails) {
         UserEntity user = new UserEntity();
 
         // Assuming the expected columns are in specific positions (adjust as needed)
         // For example, column 0 is "username", column 1 is "email", etc.
-
         user.setUuid(utills.generateString(36));
         // Read "username" (column 0)
         Cell usernameCell = row.getCell(0);
@@ -417,8 +421,8 @@ public class AdminServiceImpl implements AdminService {
             user.setUserName(usernameCell.getStringCellValue().trim());
         } else {
             // Handle error if the value is not a string or is empty
-            throw new IllegalArgumentException("Please enter the field username at " +
-                    (row.getRowNum() + 1));
+            throw new IllegalArgumentException("Please enter the field username at "
+                    + (row.getRowNum() + 1));
         }
 
         // Read "email" (column 1)
@@ -426,8 +430,8 @@ public class AdminServiceImpl implements AdminService {
         if (emailCell != null && emailCell.getCellType() == CellType.STRING) {
             user.setEmail(emailCell.getStringCellValue().trim());
         } else {
-            throw new IllegalArgumentException("Please enter the field email at " +
-                    (row.getRowNum() + 1));
+            throw new IllegalArgumentException("Please enter the field email at "
+                    + (row.getRowNum() + 1));
         }
 
         // Read "phone" (column 2)
@@ -443,17 +447,17 @@ public class AdminServiceImpl implements AdminService {
                 } else {
                     throw new IllegalArgumentException(
                             "Invalid phone number. Please enter a valid 10-digit phone number at"
-                                    + (row.getRowNum() + 1));
+                            + (row.getRowNum() + 1));
                 }
             } else {
                 throw new IllegalArgumentException(
-                        "Invalid phone cell type. Phone number must be a string or numeric at" +
-                                (row.getRowNum() + 1));
+                        "Invalid phone cell type. Phone number must be a string or numeric at"
+                        + (row.getRowNum() + 1));
             }
         } else {
             throw new IllegalArgumentException(
-                    "Phone field is missing. Please enter the phone number at " +
-                            (row.getRowNum() + 1));
+                    "Phone field is missing. Please enter the phone number at "
+                    + (row.getRowNum() + 1));
         }
 
         // Read "country" (column 3)
@@ -461,8 +465,8 @@ public class AdminServiceImpl implements AdminService {
         if (countryCell != null && countryCell.getCellType() == CellType.STRING) {
             user.setCountry(countryCell.getStringCellValue().trim());
         } else {
-            throw new IllegalArgumentException("Please enter the field country at" +
-                    (row.getRowNum() + 1));
+            throw new IllegalArgumentException("Please enter the field country at"
+                    + (row.getRowNum() + 1));
         }
 
         // Read "state" (column 4)
@@ -470,8 +474,8 @@ public class AdminServiceImpl implements AdminService {
         if (stateCell != null && stateCell.getCellType() == CellType.STRING) {
             user.setState(stateCell.getStringCellValue().trim());
         } else {
-            throw new IllegalArgumentException("Please enter the field state at" +
-                    (row.getRowNum() + 1));
+            throw new IllegalArgumentException("Please enter the field state at"
+                    + (row.getRowNum() + 1));
         }
         // Read "dob" (column 5), assuming it's a date (you can adjust for other
         // formats)
@@ -483,21 +487,25 @@ public class AdminServiceImpl implements AdminService {
                     SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
                     user.setDob(sdf.format(dobCell.getDateCellValue())); // Convert date to string
                 } else {
-                    throw new IllegalArgumentException("Please enter the Valid dob at" +
-                            (row.getRowNum() + 1));
+                    throw new IllegalArgumentException("Please enter the Valid dob at"
+                            + (row.getRowNum() + 1));
                 }
             } else {
-                throw new IllegalArgumentException("DOB number should be in " +
-                        dobCell.getCellType() + (row.getRowNum() + 1));
+                throw new IllegalArgumentException("DOB number should be in "
+                        + dobCell.getCellType() + (row.getRowNum() + 1));
             }
         } else {
-            throw new IllegalArgumentException("Please enter the field dob at " +
-                    (row.getRowNum() + 1));
+            throw new IllegalArgumentException("Please enter the field dob at "
+                    + (row.getRowNum() + 1));
         }
 
         user.setRole("ROLE_STUDENT,");
         user.setCreatedAt(LocalDateTime.now());
-        user.setCreatedBy(user.getUuid());
+        user.setCreatedBy(userDetails.getUuid());
+        SecureRandom secureRandom = new SecureRandom();
+        String sixDigitNumber = String.valueOf(100000 + secureRandom.nextInt(900000)); // Generates a number between 100000 and 999999
+        System.out.println("6-Digit Secure Random Number: " + sixDigitNumber);
+        user.setRollNo(sixDigitNumber);
 
         if (user.getPassword() == null || user.getPassword().isEmpty()) {
             user.setPassword(utills.generateRandomPassword()); // Set a random password if it's not provided
@@ -507,7 +515,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public ResponseEntity<?> fetchUserBooks(HttpServletRequest req, HttpServletResponse res, UserInfoDTO userDetails) {
+    public ResponseEntity<?> fetchUserBooksByUserId(HttpServletRequest req, HttpServletResponse res, UserInfoDTO userDetails) {
         // TODO Auto-generated method stub
 
         try {
