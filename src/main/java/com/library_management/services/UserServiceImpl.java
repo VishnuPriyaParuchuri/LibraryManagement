@@ -31,14 +31,13 @@ public class UserServiceImpl implements UserService {
     Utills utills;
 
     @Override
-    public ResponseEntity<?> getAllBooks(HttpServletRequest req, HttpServletResponse res) {
+    public ResponseEntity<?> getAllBooks(HttpServletRequest req, HttpServletResponse res, String searchKey) {
 
-        try
-
-        {
+        try {
 
             // Fetching all books along with user details
-            List<Object[]> getBooks = userDAO.getAllBooks();
+            String key = searchKey != null ? searchKey : null;
+            List<Object[]> getBooks = userDAO.getAllBooks(key);
 
             // Create a list to store the formatted book data
             List<Map<String, Object>> formattedBooks = new ArrayList<>();
