@@ -14,10 +14,10 @@ public class UserDAOImpl implements UserDAO {
     BookRepository bookRepository;
 
     @Override
-    public List<Object[]> getAllBooks() {
+    public List<Object[]> getAllBooks(String searchKey) {
         // TODO Auto-generated method stub
 
-        return bookRepository.findBookswithUserDetails();
+        return bookRepository.findBooksWithUserDetails(searchKey);
 
     }
 
