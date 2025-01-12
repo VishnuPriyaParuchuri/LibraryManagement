@@ -24,6 +24,7 @@ LEFT JOIN lm_book AS book
 
 --- bookDetails and all the users list who have accessed the book
 
+CREATE VIEW fetch_book_with_users AS
 SELECT 
     b.id AS bookId,
     b.book_name,
@@ -47,7 +48,6 @@ LEFT JOIN
     lm_user u ON sb.user_id = u.id
 GROUP BY 
     b.id, b.book_name, b.author, b.description;
-
 
 
 
