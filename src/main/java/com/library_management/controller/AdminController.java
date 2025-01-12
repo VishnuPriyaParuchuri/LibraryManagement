@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.library_management.dto.BookServiceDTO;
-import com.library_management.dto.UserBookViewDTO;
 import com.library_management.dto.UserInfoDTO;
 import com.library_management.dto.UserServiceDTO;
 import com.library_management.services.AdminService;
@@ -85,5 +84,21 @@ public class AdminController {
             @RequestBody BookServiceDTO bookServiceDTO, @RequestParam int page, @RequestParam int size) {
 
         return adminService.fetchUserBooksByBookId(req, res, bookServiceDTO, page, size);
+    }
+
+    @PostMapping("/update/books/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> updateBooksByBookId(HttpServletRequest req, HttpServletResponse res,
+            @PathVariable("id") String id, @RequestBody BookServiceDTO bookServiceDTO) {
+
+        return adminService.updateBooksByBookId(req, res, id, bookServiceDTO);
+    }
+
+    @DeleteMapping("/delete/book/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> deleteBooksById(HttpServletRequest req, HttpServletResponse res,
+            @PathVariable("id") String id) {
+
+        return adminService.deleteBooksByBookId(req, res, id);
     }
 }

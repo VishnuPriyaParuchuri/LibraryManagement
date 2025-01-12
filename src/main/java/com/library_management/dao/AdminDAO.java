@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import com.library_management.dto.BookServiceDTO;
 import com.library_management.dto.UserBookViewDTO;
 import com.library_management.dto.UserInfoDTO;
 import com.library_management.dto.UserServiceDTO;
@@ -31,5 +32,9 @@ public interface AdminDAO {
     List<UserBookViewDTO> getUserBooksById(String id);
 
     Page<UserBookViewDTO> getUserBooksInfoByBookId(String id, Pageable pageable);
+
+    BookServiceDTO updateBooksInfo(String id, BookServiceDTO bookServiceDTO);
+
+    Optional<BookEntity> deleteBookInfo(String id);
 
 }

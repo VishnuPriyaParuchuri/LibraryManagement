@@ -22,8 +22,18 @@ public interface AdminService {
 
         ResponseEntity<?> deleteUser(HttpServletRequest req, HttpServletResponse res, String id);
 
-    ResponseEntity<?> uploadUsersData(HttpServletRequest req, HttpServletResponse res, MultipartFile file, UserInfoDTO userDetails);
+        ResponseEntity<?> uploadUsersData(HttpServletRequest req, HttpServletResponse res, MultipartFile file,
+                        UserInfoDTO userDetails);
 
-    ResponseEntity<?> fetchUserBooksByUserId(HttpServletRequest req, HttpServletResponse res, UserInfoDTO userDetails);
+        ResponseEntity<?> fetchUserBooksByUserId(HttpServletRequest req, HttpServletResponse res,
+                        UserInfoDTO userDetails);
+
+        ResponseEntity<?> fetchUserBooksByBookId(HttpServletRequest req, HttpServletResponse res,
+                        BookServiceDTO bookServiceDTO, int page, int size);
+
+        ResponseEntity<?> updateBooksByBookId(HttpServletRequest req, HttpServletResponse res, String id,
+                        BookServiceDTO bookServiceDTO);
+
+        ResponseEntity<?> deleteBooksByBookId(HttpServletRequest req, HttpServletResponse res, String id);
 
 }

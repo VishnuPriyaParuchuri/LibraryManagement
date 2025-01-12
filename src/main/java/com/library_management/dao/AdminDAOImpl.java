@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import com.library_management.dto.BookServiceDTO;
 import com.library_management.dto.UserBookViewDTO;
 import com.library_management.dto.UserInfoDTO;
 import com.library_management.dto.UserServiceDTO;
@@ -159,6 +160,52 @@ public class AdminDAOImpl implements AdminDAO {
         // TODO Auto-generated method stub
 
         return userRepository.findUserBooksByBookId(id, pageable);
+    }
+
+    @Override
+    public BookServiceDTO updateBooksInfo(String id, BookServiceDTO bookServiceDTO) {
+        // TODO Auto-generated method stub
+
+        return bookRepository.findById(id)
+                .map(entity -> {
+                    // Update other fields as needed
+                    if (bookServiceDTO.getBookName() != null) {
+                        entity.setBookName(bookServiceDTO.getBookName());
+                    }
+
+                    if (bookServiceDTO.getAuthor() != null) {
+                        entity.setAuthor(bookServiceDTO.getAuthor());
+                    }
+
+                    if (bookServiceDTO.getDescription() != null) {
+                        entity.setDescription(bookServiceDTO.getDescription());
+                    }
+
+                    if (bookServiceDTO.getNoOfSets() != null) {
+                        entity.setNoOfSets(bookServiceDTO.getNoOfSets());
+                    }
+
+                    entity.setUpdatedAt(LocalDateTime.now());
+                    // entity.setUpdatedBy(userDetails.getUuid());
+
+                    BookEntity bookEntity = bookRepository.save(entity);
+                    return utillDTO.convertToBookDTO(bookEntity);
+
+                }).orElseThrow(() -> new UsernameNotFoundException("User not found with id "
+                        + id));
+    }
+
+    @Override
+    public Optional<BookEntity> deleteBookInfo(String id) {
+        // TODO Auto-generated method stub
+
+        Optional<BookEntity> deleteBook = bookRepository.findById(id);
+        if (deleteBook.isPresent()) {
+            bookRepository.deleteById(id);
+            return deleteBook;
+        } else {
+            return Optional.empty();
+        }
     }
 
 }

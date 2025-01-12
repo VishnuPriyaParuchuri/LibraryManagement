@@ -448,17 +448,17 @@ public class AdminServiceImpl implements AdminService {
                 } else {
                     throw new IllegalArgumentException(
                             "Invalid phone number. Please enter a valid 10-digit phone number at"
-                            + (row.getRowNum() + 1));
+                                    + (row.getRowNum() + 1));
                 }
             } else {
                 throw new IllegalArgumentException(
                         "Invalid phone cell type. Phone number must be a string or numeric at"
-                        + (row.getRowNum() + 1));
+                                + (row.getRowNum() + 1));
             }
         } else {
             throw new IllegalArgumentException(
                     "Phone field is missing. Please enter the phone number at "
-                    + (row.getRowNum() + 1));
+                            + (row.getRowNum() + 1));
         }
 
         // Read "country" (column 3)
@@ -504,7 +504,8 @@ public class AdminServiceImpl implements AdminService {
         user.setCreatedAt(LocalDateTime.now());
         user.setCreatedBy(userDetails.getUuid());
         SecureRandom secureRandom = new SecureRandom();
-        String sixDigitNumber = String.valueOf(100000 + secureRandom.nextInt(900000)); // Generates a number between 100000 and 999999
+        String sixDigitNumber = String.valueOf(100000 + secureRandom.nextInt(900000)); // Generates a number between
+                                                                                       // 100000 and 999999
         System.out.println("6-Digit Secure Random Number: " + sixDigitNumber);
         user.setRollNo(sixDigitNumber);
 
@@ -516,8 +517,8 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public ResponseEntity<?> fetchUserBooksByUserId(HttpServletRequest req, HttpServletResponse res, UserInfoDTO userDetails) {
-        // TODO Auto-generated method stub
+    public ResponseEntity<?> fetchUserBooksByUserId(HttpServletRequest req, HttpServletResponse res,
+            UserInfoDTO userDetails) {
 
         try {
 
@@ -595,4 +596,84 @@ public class AdminServiceImpl implements AdminService {
 
     }
 
+    @Override
+    public ResponseEntity<?> updateBooksByBookId(HttpServletRequest req, HttpServletResponse res, String id,
+            BookServiceDTO bookServiceDTO) {
+
+        try {
+
+            if (id.isEmpty()) {
+
+                String errorMessages = "Id is required!";
+
+                CustomResponse<String> responseBody = new CustomResponse<>(errorMessages, "BAD_REQUEST",
+                        HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+            }
+
+            BookServiceDTO updateBooks = adminDAO.updateBooksInfo(id, bookServiceDTO);
+
+            System.out.println("UPDATE BOOKS" + " " + updateBooks);
+
+            CustomResponse<?> responseBody = new CustomResponse<>(updateBooks, "SUCCESS",
+                    HttpStatus.OK.value(),
+                    req.getRequestURI(), LocalDateTime.now());
+
+            return new ResponseEntity<>(responseBody, HttpStatus.OK);
+
+        } catch (Exception e) {
+
+            CustomResponse<String> responseBody = new CustomResponse<>(e.getMessage(),
+                    "BAD_REQUEST",
+                    HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+            return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> deleteBooksByBookId(HttpServletRequest req, HttpServletResponse res, String id) {
+
+        try {
+
+            if (id.isBlank()) {
+
+                String errorMessages = "Id is required!";
+
+                CustomResponse<String> responseBody = new CustomResponse<>(errorMessages, "BAD_REQUEST",
+                        HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+            }
+
+            Optional<BookEntity> deleteBook = adminDAO.deleteBookInfo(id);
+
+            if (deleteBook.isEmpty()) {
+
+                String errorMessage = "Book not found with ID: " + id;
+
+                CustomResponse<String> responseBody = new CustomResponse<>(errorMessage, "NOT_FOUND",
+                        HttpStatus.NOT_FOUND.value(), req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.NOT_FOUND);
+            }
+
+            CustomResponse<?> responseBody = new CustomResponse<>("Book deleted successfully", "DELETED",
+                    HttpStatus.OK.value(),
+                    req.getRequestURI(), LocalDateTime.now());
+
+            return new ResponseEntity<>(responseBody, HttpStatus.OK);
+
+        } catch (Exception e) {
+
+            String stackTrace = utills.getStackTraceAsString(e);
+
+            CustomResponse<String> responseBody = new CustomResponse<>(stackTrace,
+                    "BAD_REQUEST",
+                    HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+            return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+
+        }
+    }
 }
