@@ -22,8 +22,10 @@ public class UserBookViewDTO {
 
     private String status;
 
+    private String bookId;
+
     public UserBookViewDTO(String id, String user_name, String email, String author, String book_name,
-            String description, Integer no_of_sets, LocalDateTime submission_date, String status) {
+            String description, Integer no_of_sets, LocalDateTime submission_date, String status, String bookId) {
         this.id = id;
         this.user_name = user_name;
         this.email = email;
@@ -105,6 +107,14 @@ public class UserBookViewDTO {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getBookId() {
+        return bookId;
+    }
+
+    public void setBookId(String bookId) {
+        this.bookId = bookId;
     }
 
 }

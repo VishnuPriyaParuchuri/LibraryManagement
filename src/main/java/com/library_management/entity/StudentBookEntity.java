@@ -45,7 +45,7 @@ public class StudentBookEntity {
     @Column(name = "UPDATED_BY")
     private String updatedBy;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "USER_ID", referencedColumnName = "id", nullable = false)
     private UserEntity user;
 
