@@ -27,10 +27,12 @@ import org.springframework.web.multipart.MultipartFile;
 import com.library_management.config.CustomResponse;
 import com.library_management.dao.AdminDAO;
 import com.library_management.dto.BookServiceDTO;
+import com.library_management.dto.StudentBookDTO;
 import com.library_management.dto.UserBookViewDTO;
 import com.library_management.dto.UserInfoDTO;
 import com.library_management.dto.UserServiceDTO;
 import com.library_management.entity.BookEntity;
+import com.library_management.entity.StudentBookEntity;
 import com.library_management.entity.UserEntity;
 import com.library_management.utill.Utills;
 
@@ -448,17 +450,17 @@ public class AdminServiceImpl implements AdminService {
                 } else {
                     throw new IllegalArgumentException(
                             "Invalid phone number. Please enter a valid 10-digit phone number at"
-                                    + (row.getRowNum() + 1));
+                            + (row.getRowNum() + 1));
                 }
             } else {
                 throw new IllegalArgumentException(
                         "Invalid phone cell type. Phone number must be a string or numeric at"
-                                + (row.getRowNum() + 1));
+                        + (row.getRowNum() + 1));
             }
         } else {
             throw new IllegalArgumentException(
                     "Phone field is missing. Please enter the phone number at "
-                            + (row.getRowNum() + 1));
+                    + (row.getRowNum() + 1));
         }
 
         // Read "country" (column 3)
@@ -505,7 +507,7 @@ public class AdminServiceImpl implements AdminService {
         user.setCreatedBy(userDetails.getUuid());
         SecureRandom secureRandom = new SecureRandom();
         String sixDigitNumber = String.valueOf(100000 + secureRandom.nextInt(900000)); // Generates a number between
-                                                                                       // 100000 and 999999
+        // 100000 and 999999
         System.out.println("6-Digit Secure Random Number: " + sixDigitNumber);
         user.setRollNo(sixDigitNumber);
 
@@ -674,6 +676,66 @@ public class AdminServiceImpl implements AdminService {
                     HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
             return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
 
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> assignBookToUser(HttpServletRequest req, HttpServletResponse res,
+            StudentBookDTO studentBookDTO) {
+        try {
+
+            Optional<BookEntity> getBookDetails = adminDAO.getBookById(studentBookDTO.getBookId());
+
+            Optional<UserEntity> getUserDetails = adminDAO.getUserByRollNumber(studentBookDTO.getRollNumber());
+
+            if (getBookDetails.get().getId().isEmpty() || getUserDetails.get().getId().isEmpty()) {
+                String errorMessage = "Book ID or User ID is required!";
+
+                CustomResponse<String> responseBody = new CustomResponse<>(errorMessage, "BAD_REQUEST",
+                        HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+            }
+
+            if (getBookDetails.get().getNoOfSets() <= 0) {
+                String errorMessage = "No sets available for the book";
+
+                CustomResponse<String> responseBody = new CustomResponse<>(errorMessage, "BAD_REQUEST",
+                        HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+            }
+
+            BookEntity bookEntity = getBookDetails.get();
+
+            bookEntity.setNoOfSets(getBookDetails.get().getNoOfSets() - 1);
+            bookEntity.setUpdatedAt(LocalDateTime.now());
+            bookEntity.setUpdatedBy(getUserDetails.get().getUuid());
+
+            adminDAO.updateBookDetails(bookEntity);
+
+            StudentBookEntity studentBook = new StudentBookEntity();
+            studentBook.setBook(getBookDetails.get());
+            studentBook.setUser(getUserDetails.get());
+            studentBook.setStatus("Pending");
+            studentBook.setSubmissionDate(LocalDateTime.now().plusDays(10));
+            studentBook.setCreatedAt(LocalDateTime.now());
+            studentBook.setCreatedBy(getUserDetails.get().getUuid());
+
+            StudentBookEntity createStudentBook = adminDAO.createStudentBook(studentBook);
+
+            CustomResponse<?> responseBody = new CustomResponse<>(createStudentBook, "SUCCESS",
+                    HttpStatus.OK.value(),
+                    req.getRequestURI(), LocalDateTime.now());
+
+            return new ResponseEntity<>(responseBody, HttpStatus.OK);
+
+        } catch (Exception e) {
+
+            CustomResponse<String> responseBody = new CustomResponse<>(e.getMessage(),
+                    "BAD_REQUEST",
+                    HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+            return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
         }
     }
 }

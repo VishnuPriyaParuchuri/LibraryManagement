@@ -16,8 +16,10 @@ import com.library_management.dto.UserBookViewDTO;
 import com.library_management.dto.UserInfoDTO;
 import com.library_management.dto.UserServiceDTO;
 import com.library_management.entity.BookEntity;
+import com.library_management.entity.StudentBookEntity;
 import com.library_management.entity.UserEntity;
 import com.library_management.repository.BookRepository;
+import com.library_management.repository.StudentBookRepo;
 import com.library_management.repository.UserRepository;
 import com.library_management.utill.UtillDTO;
 
@@ -29,6 +31,9 @@ public class AdminDAOImpl implements AdminDAO {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    StudentBookRepo studentBookRepo;
 
     @Autowired
     UtillDTO utillDTO;
@@ -110,7 +115,7 @@ public class AdminDAOImpl implements AdminDAO {
                     return utillDTO.convertToUserDTO(userEntity);
 
                 }).orElseThrow(() -> new UsernameNotFoundException("User not found with id "
-                        + id));
+                + id));
     }
 
     @Override
@@ -192,7 +197,7 @@ public class AdminDAOImpl implements AdminDAO {
                     return utillDTO.convertToBookDTO(bookEntity);
 
                 }).orElseThrow(() -> new UsernameNotFoundException("User not found with id "
-                        + id));
+                + id));
     }
 
     @Override
@@ -206,6 +211,26 @@ public class AdminDAOImpl implements AdminDAO {
         } else {
             return Optional.empty();
         }
+    }
+
+    @Override
+    public Optional<BookEntity> getBookById(String bookId) {
+        return bookRepository.findById(bookId);
+    }
+
+    @Override
+    public Optional<UserEntity> getUserByRollNumber(String rollnumber) {
+        return userRepository.findByRollNo(rollnumber);
+    }
+
+    @Override
+    public BookEntity updateBookDetails(BookEntity bookEntity) {
+        return bookRepository.save(bookEntity);
+    }
+
+    @Override
+    public StudentBookEntity createStudentBook(StudentBookEntity studentBook) {
+        return studentBookRepo.save(studentBook);
     }
 
 }
