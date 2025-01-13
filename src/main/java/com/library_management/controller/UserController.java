@@ -32,7 +32,5 @@ public class UserController {
     @PreAuthorize("hasRole('ROLE_STUDENT')or hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> getAllBooks(HttpServletRequest req, HttpServletResponse res, @RequestParam String searchKey) {
         return userService.getAllBooks(req, res, searchKey);
-
     }
-
 }

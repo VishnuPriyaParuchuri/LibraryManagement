@@ -19,8 +19,8 @@ public interface BookRepository extends JpaRepository<BookEntity, String> {
         WHERE 
             CASE 
                 WHEN :searchKey IS NULL THEN 1
-                WHEN :searchKey IS NOT NULL AND LOWER(TRIM(author)) LIKE '%' || LOWER(:searchKey) || '%' 
-                OR :searchKey IS NOT NULL AND LOWER(TRIM(book_name)) LIKE '%' || LOWER(:searchKey) || '%'
+                WHEN :searchKey IS NOT NULL AND LOWER(TRIM(author)) LIKE  CONCAT('%', LOWER(:searchKey), '%')
+                OR :searchKey IS NOT NULL AND LOWER(TRIM(book_name)) LIKE CONCAT('%', LOWER(:searchKey), '%')
               then 1  
             END = 1
     """, nativeQuery = true)
