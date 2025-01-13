@@ -1,62 +1,35 @@
-package com.library_management.entity;
+package com.library_management.dto;
 
 import java.time.LocalDateTime;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.library_management.entity.BookEntity;
+import com.library_management.entity.UserEntity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+public class StudentBookDTO {
 
-@Entity
-@Table(name = "lm_studentBook")
-public class StudentBookEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id")
     private String id;
 
-    @Column(name = "STATUS")
     private String status;
 
-    @Column(name = "SUBMISSION_DATE")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy'T'HH:mm:ss")
     private LocalDateTime SubmissionDate;
 
-    @Column(name = "CREATED_AT")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy'T'HH:mm:ss")
     private LocalDateTime createdAt;
 
-    @Column(name = "CREATED_BY")
     private String createdBy;
 
-    @Column(name = "UPDATED_AT")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy'T'HH:mm:ss")
     private LocalDateTime updatedAt;
 
-    @Column(name = "UPDATED_BY")
     private String updatedBy;
 
-    @ManyToOne
-    @JoinColumn(name = "USER_ID", referencedColumnName = "id", nullable = false)
-    @JsonIgnore
     private UserEntity user;
 
-    @ManyToOne
-    @JoinColumn(name = "BOOK_ID", referencedColumnName = "id", nullable = false)
-    @JsonIgnore
     private BookEntity book;
 
-    public StudentBookEntity() {
+    private String bookId;
 
-    }
+    private String userId;
+
+    private String rollNumber;
 
     public String getId() {
         return id;
@@ -128,6 +101,30 @@ public class StudentBookEntity {
 
     public void setBook(BookEntity book) {
         this.book = book;
+    }
+
+    public String getBookId() {
+        return bookId;
+    }
+
+    public void setBookId(String bookId) {
+        this.bookId = bookId;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getRollNumber() {
+        return rollNumber;
+    }
+
+    public void setRollNumber(String rollNumber) {
+        this.rollNumber = rollNumber;
     }
 
 }

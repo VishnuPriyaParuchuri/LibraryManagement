@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.library_management.dto.BookServiceDTO;
+import com.library_management.dto.StudentBookDTO;
 import com.library_management.dto.UserInfoDTO;
 import com.library_management.dto.UserServiceDTO;
 import com.library_management.services.AdminService;
@@ -100,5 +101,13 @@ public class AdminController {
             @PathVariable("id") String id) {
 
         return adminService.deleteBooksByBookId(req, res, id);
+    }
+
+    @PostMapping("/assign/book/user")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> assignBookToUser(HttpServletRequest req, HttpServletResponse res,
+            @RequestBody StudentBookDTO studentBookDTO) {
+
+        return adminService.assignBookToUser(req, res, studentBookDTO);
     }
 }
