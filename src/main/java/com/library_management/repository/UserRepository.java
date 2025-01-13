@@ -56,4 +56,6 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
             """, nativeQuery = true)
     Page<UserBookViewDTO> findUserBooksByBookId(@Param("bookId") String bookId, Pageable pageable);
 
+    public Optional<UserEntity> findByRollNo(String rollNumber);
+
 }
