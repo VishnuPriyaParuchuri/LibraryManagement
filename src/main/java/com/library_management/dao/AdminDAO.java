@@ -45,4 +45,6 @@ public interface AdminDAO {
     BookEntity updateBookDetails(BookEntity bookEntity);
 
     StudentBookEntity createStudentBook(StudentBookEntity studentBook);
+
+    public Optional<StudentBookEntity> checkBookAssigned(String bookId, String userId);
 }

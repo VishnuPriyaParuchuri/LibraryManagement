@@ -707,29 +707,59 @@ public class AdminServiceImpl implements AdminService {
             }
 
             BookEntity bookEntity = getBookDetails.get();
-
             bookEntity.setNoOfSets(getBookDetails.get().getNoOfSets() - 1);
             bookEntity.setUpdatedAt(LocalDateTime.now());
             bookEntity.setUpdatedBy(getUserDetails.get().getUuid());
-
             adminDAO.updateBookDetails(bookEntity);
+            Optional<StudentBookEntity> checkBookAssigned = adminDAO.checkBookAssigned(getBookDetails.get().getId(),
+                    getUserDetails.get().getId());
 
-            StudentBookEntity studentBook = new StudentBookEntity();
-            studentBook.setBook(getBookDetails.get());
-            studentBook.setUser(getUserDetails.get());
-            studentBook.setStatus("Pending");
-            studentBook.setSubmissionDate(LocalDateTime.now().plusDays(10));
-            studentBook.setCreatedAt(LocalDateTime.now());
-            studentBook.setCreatedBy(getUserDetails.get().getUuid());
+            if (checkBookAssigned.isEmpty()) {
+                StudentBookEntity studentBook = new StudentBookEntity();
+                studentBook.setBook(getBookDetails.get());
+                studentBook.setUser(getUserDetails.get());
+                studentBook.setStatus("Pending");
+                studentBook.setSubmissionDate(LocalDateTime.now().plusDays(10));
+                studentBook.setCreatedAt(LocalDateTime.now());
+                studentBook.setCreatedBy(getUserDetails.get().getUuid());
+                StudentBookEntity createStudentBook = adminDAO.createStudentBook(studentBook);
 
-            StudentBookEntity createStudentBook = adminDAO.createStudentBook(studentBook);
+                CustomResponse<?> responseBody = new CustomResponse<>(createStudentBook, "SUCCESS",
+                        HttpStatus.OK.value(),
+                        req.getRequestURI(), LocalDateTime.now());
 
-            CustomResponse<?> responseBody = new CustomResponse<>(createStudentBook, "SUCCESS",
-                    HttpStatus.OK.value(),
-                    req.getRequestURI(), LocalDateTime.now());
+                return new ResponseEntity<>(responseBody, HttpStatus.OK);
+            } else if (checkBookAssigned.get().getStatus().equalsIgnoreCase("submited")) {
+                StudentBookEntity studentBook = checkBookAssigned.get();
+                studentBook.setStatus("Pending");
+                studentBook.setSubmissionDate(LocalDateTime.now().plusDays(10));
+                studentBook.setUpdatedAt(LocalDateTime.now());
+                studentBook.setUpdatedBy(getUserDetails.get().getUuid());
 
-            return new ResponseEntity<>(responseBody, HttpStatus.OK);
+                StudentBookEntity updateStudentBook = adminDAO.createStudentBook(studentBook);
 
+                CustomResponse<?> responseBody = new CustomResponse<>(updateStudentBook, "SUCCESS",
+                        HttpStatus.OK.value(),
+                        req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.OK);
+            } else {
+
+                StudentBookEntity studentBook = checkBookAssigned.get();
+                studentBook.setStatus("Submited");
+                studentBook.setSubmissionDate(LocalDateTime.now());
+                studentBook.setUpdatedAt(LocalDateTime.now());
+                studentBook.setUpdatedBy(getUserDetails.get().getUuid());
+
+                StudentBookEntity updateStudentBook = adminDAO.createStudentBook(studentBook);
+
+                CustomResponse<?> responseBody = new CustomResponse<>(updateStudentBook, "SUCCESS",
+                        HttpStatus.OK.value(),
+                        req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.OK);
+
+            }
         } catch (Exception e) {
 
             CustomResponse<String> responseBody = new CustomResponse<>(e.getMessage(),

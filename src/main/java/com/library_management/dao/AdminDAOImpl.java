@@ -233,4 +233,9 @@ public class AdminDAOImpl implements AdminDAO {
         return studentBookRepo.save(studentBook);
     }
 
+    @Override
+    public Optional<StudentBookEntity> checkBookAssigned(String bookId, String userId) {
+        return studentBookRepo.findByBookIdAndUserId(bookId, userId);
+    }
+
 }
