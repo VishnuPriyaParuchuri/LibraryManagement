@@ -1,13 +1,11 @@
 package com.library_management.utill;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 
-import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
+import com.library_management.dto.BookServiceDTO;
 import com.library_management.dto.UserServiceDTO;
+import com.library_management.entity.BookEntity;
 import com.library_management.entity.UserEntity;
 
 @Component
@@ -29,6 +27,19 @@ public class UtillDTO {
                 userEntity.getCreatedBy(),
                 userEntity.getUpdatedAt(),
                 userEntity.getUpdatedBy());
+    }
+
+    public BookServiceDTO convertToBookDTO(BookEntity bookEntity) {
+        return new BookServiceDTO(
+                bookEntity.getId(),
+                bookEntity.getBookName(),
+                bookEntity.getAuthor(),
+                bookEntity.getDescription(),
+                bookEntity.getNoOfSets(),
+                bookEntity.getCreatedAt(),
+                bookEntity.getCreatedBy(),
+                bookEntity.getUpdatedAt(),
+                bookEntity.getUpdatedBy());
     }
 
 }

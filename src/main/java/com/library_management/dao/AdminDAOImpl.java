@@ -11,11 +11,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import com.library_management.dto.BookServiceDTO;
+import com.library_management.dto.UserBookViewDTO;
 import com.library_management.dto.UserInfoDTO;
 import com.library_management.dto.UserServiceDTO;
 import com.library_management.entity.BookEntity;
+import com.library_management.entity.StudentBookEntity;
 import com.library_management.entity.UserEntity;
 import com.library_management.repository.BookRepository;
+import com.library_management.repository.StudentBookRepo;
 import com.library_management.repository.UserRepository;
 import com.library_management.utill.UtillDTO;
 
@@ -27,6 +31,9 @@ public class AdminDAOImpl implements AdminDAO {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    StudentBookRepo studentBookRepo;
 
     @Autowired
     UtillDTO utillDTO;
@@ -108,7 +115,7 @@ public class AdminDAOImpl implements AdminDAO {
                     return utillDTO.convertToUserDTO(userEntity);
 
                 }).orElseThrow(() -> new UsernameNotFoundException("User not found with id "
-                        + id));
+                + id));
     }
 
     @Override
@@ -144,6 +151,91 @@ public class AdminDAOImpl implements AdminDAO {
             // empty list)
             return new ArrayList<>();
         }
+    }
+
+    @Override
+    public List<UserBookViewDTO> getUserBooksById(String id) {
+        // TODO Auto-generated method stub
+
+        return userRepository.findUserBooksById(id);
+    }
+
+    @Override
+    public Page<UserBookViewDTO> getUserBooksInfoByBookId(String id, Pageable pageable) {
+        // TODO Auto-generated method stub
+
+        return userRepository.findUserBooksByBookId(id, pageable);
+    }
+
+    @Override
+    public BookServiceDTO updateBooksInfo(String id, BookServiceDTO bookServiceDTO) {
+        // TODO Auto-generated method stub
+
+        return bookRepository.findById(id)
+                .map(entity -> {
+                    // Update other fields as needed
+                    if (bookServiceDTO.getBookName() != null) {
+                        entity.setBookName(bookServiceDTO.getBookName());
+                    }
+
+                    if (bookServiceDTO.getAuthor() != null) {
+                        entity.setAuthor(bookServiceDTO.getAuthor());
+                    }
+
+                    if (bookServiceDTO.getDescription() != null) {
+                        entity.setDescription(bookServiceDTO.getDescription());
+                    }
+
+                    if (bookServiceDTO.getNoOfSets() != null) {
+                        entity.setNoOfSets(bookServiceDTO.getNoOfSets());
+                    }
+
+                    entity.setUpdatedAt(LocalDateTime.now());
+                    // entity.setUpdatedBy(userDetails.getUuid());
+
+                    BookEntity bookEntity = bookRepository.save(entity);
+                    return utillDTO.convertToBookDTO(bookEntity);
+
+                }).orElseThrow(() -> new UsernameNotFoundException("User not found with id "
+                + id));
+    }
+
+    @Override
+    public Optional<BookEntity> deleteBookInfo(String id) {
+        // TODO Auto-generated method stub
+
+        Optional<BookEntity> deleteBook = bookRepository.findById(id);
+        if (deleteBook.isPresent()) {
+            bookRepository.deleteById(id);
+            return deleteBook;
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public Optional<BookEntity> getBookById(String bookId) {
+        return bookRepository.findById(bookId);
+    }
+
+    @Override
+    public Optional<UserEntity> getUserByRollNumber(String rollnumber) {
+        return userRepository.findByRollNo(rollnumber);
+    }
+
+    @Override
+    public BookEntity updateBookDetails(BookEntity bookEntity) {
+        return bookRepository.save(bookEntity);
+    }
+
+    @Override
+    public StudentBookEntity createStudentBook(StudentBookEntity studentBook) {
+        return studentBookRepo.save(studentBook);
+    }
+
+    @Override
+    public Optional<StudentBookEntity> checkBookAssigned(String bookId, String userId) {
+        return studentBookRepo.findByBookIdAndUserId(bookId, userId);
     }
 
 }

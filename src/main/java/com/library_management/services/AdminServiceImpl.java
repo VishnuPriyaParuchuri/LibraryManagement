@@ -1,14 +1,13 @@
 package com.library_management.services;
 
+import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.Random;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -25,17 +24,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.library_management.config.CustomResponse;
 import com.library_management.dao.AdminDAO;
+import com.library_management.dto.BookServiceDTO;
+import com.library_management.dto.StudentBookDTO;
+import com.library_management.dto.UserBookViewDTO;
 import com.library_management.dto.UserInfoDTO;
 import com.library_management.dto.UserServiceDTO;
+import com.library_management.entity.BookEntity;
+import com.library_management.entity.StudentBookEntity;
+import com.library_management.entity.UserEntity;
 import com.library_management.utill.Utills;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
-import com.library_management.config.CustomResponse;
-import com.library_management.entity.BookEntity;
-import com.library_management.entity.UserEntity;
 
 @Service
 public class AdminServiceImpl implements AdminService {
@@ -154,6 +156,13 @@ public class AdminServiceImpl implements AdminService {
             book.setDescription(descriptionCell.getStringCellValue().trim());
         } else {
             throw new IllegalArgumentException("Please enter the field description at row " + (row.getRowNum() + 1));
+        }
+
+        Cell noOFSetsCell = row.getCell(3);
+        if (noOFSetsCell != null && noOFSetsCell.getCellType() == CellType.NUMERIC) {
+            book.setNoOfSets((int) noOFSetsCell.getNumericCellValue());
+        } else {
+            throw new IllegalArgumentException("Please enter the field no of sets at row " + (row.getRowNum() + 1));
         }
 
         book.setCreatedAt(LocalDateTime.now());
@@ -280,7 +289,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public ResponseEntity<?> uploadUsersData(HttpServletRequest req,
-            HttpServletResponse res, MultipartFile file) {
+            HttpServletResponse res, MultipartFile file, UserInfoDTO userDetails) {
 
         try {
             if (file.isEmpty()) {
@@ -295,8 +304,8 @@ public class AdminServiceImpl implements AdminService {
 
             }
 
-            if (!file.getOriginalFilename().endsWith(".xls") &&
-                    !file.getOriginalFilename().endsWith(".xlsx")) {
+            if (!file.getOriginalFilename().endsWith(".xls")
+                    && !file.getOriginalFilename().endsWith(".xlsx")) {
                 String errorMessage = "Invalid file type! Please upload a valid Excel file.";
                 CustomResponse<String> responseBody = new CustomResponse<>(errorMessage,
                         "BAD_REQUEST",
@@ -322,7 +331,7 @@ public class AdminServiceImpl implements AdminService {
                     if (isRowEmpty(row)) {
                         continue;
                     }
-                    UserEntity user = validateParseRow(row);
+                    UserEntity user = validateParseRow(row, userDetails);
                     users.add(user);
                 }
 
@@ -380,10 +389,10 @@ public class AdminServiceImpl implements AdminService {
                 "country", "state", "dob");
         for (int i = 0; i < requiredHeaders.size(); i++) {
             Cell cell = headerRow.getCell(i);
-            if (cell == null ||
-                    !requiredHeaders.get(i).equalsIgnoreCase(cell.getStringCellValue().trim())) {
-                throw new IllegalArgumentException("Invalid column name: " +
-                        requiredHeaders.get(i));
+            if (cell == null
+                    || !requiredHeaders.get(i).equalsIgnoreCase(cell.getStringCellValue().trim())) {
+                throw new IllegalArgumentException("Invalid column name: "
+                        + requiredHeaders.get(i));
             }
         }
     }
@@ -403,12 +412,11 @@ public class AdminServiceImpl implements AdminService {
         return true;
     }
 
-    private UserEntity validateParseRow(Row row) {
+    private UserEntity validateParseRow(Row row, UserInfoDTO userDetails) {
         UserEntity user = new UserEntity();
 
         // Assuming the expected columns are in specific positions (adjust as needed)
         // For example, column 0 is "username", column 1 is "email", etc.
-
         user.setUuid(utills.generateString(36));
         // Read "username" (column 0)
         Cell usernameCell = row.getCell(0);
@@ -416,8 +424,8 @@ public class AdminServiceImpl implements AdminService {
             user.setUserName(usernameCell.getStringCellValue().trim());
         } else {
             // Handle error if the value is not a string or is empty
-            throw new IllegalArgumentException("Please enter the field username at " +
-                    (row.getRowNum() + 1));
+            throw new IllegalArgumentException("Please enter the field username at "
+                    + (row.getRowNum() + 1));
         }
 
         // Read "email" (column 1)
@@ -425,8 +433,8 @@ public class AdminServiceImpl implements AdminService {
         if (emailCell != null && emailCell.getCellType() == CellType.STRING) {
             user.setEmail(emailCell.getStringCellValue().trim());
         } else {
-            throw new IllegalArgumentException("Please enter the field email at " +
-                    (row.getRowNum() + 1));
+            throw new IllegalArgumentException("Please enter the field email at "
+                    + (row.getRowNum() + 1));
         }
 
         // Read "phone" (column 2)
@@ -442,17 +450,17 @@ public class AdminServiceImpl implements AdminService {
                 } else {
                     throw new IllegalArgumentException(
                             "Invalid phone number. Please enter a valid 10-digit phone number at"
-                                    + (row.getRowNum() + 1));
+                            + (row.getRowNum() + 1));
                 }
             } else {
                 throw new IllegalArgumentException(
-                        "Invalid phone cell type. Phone number must be a string or numeric at" +
-                                (row.getRowNum() + 1));
+                        "Invalid phone cell type. Phone number must be a string or numeric at"
+                        + (row.getRowNum() + 1));
             }
         } else {
             throw new IllegalArgumentException(
-                    "Phone field is missing. Please enter the phone number at " +
-                            (row.getRowNum() + 1));
+                    "Phone field is missing. Please enter the phone number at "
+                    + (row.getRowNum() + 1));
         }
 
         // Read "country" (column 3)
@@ -460,8 +468,8 @@ public class AdminServiceImpl implements AdminService {
         if (countryCell != null && countryCell.getCellType() == CellType.STRING) {
             user.setCountry(countryCell.getStringCellValue().trim());
         } else {
-            throw new IllegalArgumentException("Please enter the field country at" +
-                    (row.getRowNum() + 1));
+            throw new IllegalArgumentException("Please enter the field country at"
+                    + (row.getRowNum() + 1));
         }
 
         // Read "state" (column 4)
@@ -469,8 +477,8 @@ public class AdminServiceImpl implements AdminService {
         if (stateCell != null && stateCell.getCellType() == CellType.STRING) {
             user.setState(stateCell.getStringCellValue().trim());
         } else {
-            throw new IllegalArgumentException("Please enter the field state at" +
-                    (row.getRowNum() + 1));
+            throw new IllegalArgumentException("Please enter the field state at"
+                    + (row.getRowNum() + 1));
         }
         // Read "dob" (column 5), assuming it's a date (you can adjust for other
         // formats)
@@ -482,21 +490,26 @@ public class AdminServiceImpl implements AdminService {
                     SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
                     user.setDob(sdf.format(dobCell.getDateCellValue())); // Convert date to string
                 } else {
-                    throw new IllegalArgumentException("Please enter the Valid dob at" +
-                            (row.getRowNum() + 1));
+                    throw new IllegalArgumentException("Please enter the Valid dob at"
+                            + (row.getRowNum() + 1));
                 }
             } else {
-                throw new IllegalArgumentException("DOB number should be in " +
-                        dobCell.getCellType() + (row.getRowNum() + 1));
+                throw new IllegalArgumentException("DOB number should be in "
+                        + dobCell.getCellType() + (row.getRowNum() + 1));
             }
         } else {
-            throw new IllegalArgumentException("Please enter the field dob at " +
-                    (row.getRowNum() + 1));
+            throw new IllegalArgumentException("Please enter the field dob at "
+                    + (row.getRowNum() + 1));
         }
 
         user.setRole("ROLE_STUDENT,");
         user.setCreatedAt(LocalDateTime.now());
-        user.setCreatedBy(user.getUuid());
+        user.setCreatedBy(userDetails.getUuid());
+        SecureRandom secureRandom = new SecureRandom();
+        String sixDigitNumber = String.valueOf(100000 + secureRandom.nextInt(900000)); // Generates a number between
+        // 100000 and 999999
+        System.out.println("6-Digit Secure Random Number: " + sixDigitNumber);
+        user.setRollNo(sixDigitNumber);
 
         if (user.getPassword() == null || user.getPassword().isEmpty()) {
             user.setPassword(utills.generateRandomPassword()); // Set a random password if it's not provided
@@ -505,4 +518,254 @@ public class AdminServiceImpl implements AdminService {
         return user;
     }
 
+    @Override
+    public ResponseEntity<?> fetchUserBooksByUserId(HttpServletRequest req, HttpServletResponse res,
+            UserInfoDTO userDetails) {
+
+        try {
+
+            if (userDetails.getId().isEmpty()) {
+
+                String errorMessages = "Id is required!";
+
+                CustomResponse<String> responseBody = new CustomResponse<>(errorMessages, "BAD_REQUEST",
+                        HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+            }
+
+            List<UserBookViewDTO> getUserBooks = adminDAO.getUserBooksById(userDetails.getId());
+
+            CustomResponse<?> responseBody = new CustomResponse<>(getUserBooks, "SUCCESS",
+                    HttpStatus.OK.value(),
+                    req.getRequestURI(), LocalDateTime.now());
+
+            return new ResponseEntity<>(responseBody, HttpStatus.OK);
+
+        } catch (Exception e) {
+
+            CustomResponse<String> responseBody = new CustomResponse<>(e.getMessage(),
+                    "BAD_REQUEST",
+                    HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+            return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> fetchUserBooksByBookId(HttpServletRequest req, HttpServletResponse res,
+            BookServiceDTO bookServiceDTO, int page, int size) {
+
+        try {
+
+            String id = bookServiceDTO.getId() != null ? bookServiceDTO.getId() : null;
+
+            if (id == null) {
+
+                String errorMessages = "Id is required!";
+
+                CustomResponse<String> responseBody = new CustomResponse<>(errorMessages, "BAD_REQUEST",
+                        HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+            }
+
+            Pageable pageable = PageRequest.of(page, size);
+
+            Page<UserBookViewDTO> getUserBooksByBookId = adminDAO.getUserBooksInfoByBookId(bookServiceDTO.getId(),
+                    pageable);
+
+            Map<String, Object> finalUserBooksList = new LinkedHashMap<>();
+            finalUserBooksList.put("users", getUserBooksByBookId.getContent());
+            finalUserBooksList.put("currentPage", getUserBooksByBookId.getNumber());
+            finalUserBooksList.put("totalItems", getUserBooksByBookId.getTotalElements());
+            finalUserBooksList.put("totalPages", getUserBooksByBookId.getTotalPages());
+
+            CustomResponse<?> responseBody = new CustomResponse<>(finalUserBooksList, "SUCCESS",
+                    HttpStatus.OK.value(),
+                    req.getRequestURI(), LocalDateTime.now());
+
+            return new ResponseEntity<>(responseBody, HttpStatus.OK);
+
+        } catch (Exception e) {
+
+            CustomResponse<String> responseBody = new CustomResponse<>(e.getMessage(),
+                    "BAD_REQUEST",
+                    HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+            return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+
+        }
+
+    }
+
+    @Override
+    public ResponseEntity<?> updateBooksByBookId(HttpServletRequest req, HttpServletResponse res, String id,
+            BookServiceDTO bookServiceDTO) {
+
+        try {
+
+            if (id.isEmpty()) {
+
+                String errorMessages = "Id is required!";
+
+                CustomResponse<String> responseBody = new CustomResponse<>(errorMessages, "BAD_REQUEST",
+                        HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+            }
+
+            BookServiceDTO updateBooks = adminDAO.updateBooksInfo(id, bookServiceDTO);
+
+            System.out.println("UPDATE BOOKS" + " " + updateBooks);
+
+            CustomResponse<?> responseBody = new CustomResponse<>(updateBooks, "SUCCESS",
+                    HttpStatus.OK.value(),
+                    req.getRequestURI(), LocalDateTime.now());
+
+            return new ResponseEntity<>(responseBody, HttpStatus.OK);
+
+        } catch (Exception e) {
+
+            CustomResponse<String> responseBody = new CustomResponse<>(e.getMessage(),
+                    "BAD_REQUEST",
+                    HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+            return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> deleteBooksByBookId(HttpServletRequest req, HttpServletResponse res, String id) {
+
+        try {
+
+            if (id.isBlank()) {
+
+                String errorMessages = "Id is required!";
+
+                CustomResponse<String> responseBody = new CustomResponse<>(errorMessages, "BAD_REQUEST",
+                        HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+            }
+
+            Optional<BookEntity> deleteBook = adminDAO.deleteBookInfo(id);
+
+            if (deleteBook.isEmpty()) {
+
+                String errorMessage = "Book not found with ID: " + id;
+
+                CustomResponse<String> responseBody = new CustomResponse<>(errorMessage, "NOT_FOUND",
+                        HttpStatus.NOT_FOUND.value(), req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.NOT_FOUND);
+            }
+
+            CustomResponse<?> responseBody = new CustomResponse<>("Book deleted successfully", "DELETED",
+                    HttpStatus.OK.value(),
+                    req.getRequestURI(), LocalDateTime.now());
+
+            return new ResponseEntity<>(responseBody, HttpStatus.OK);
+
+        } catch (Exception e) {
+
+            String stackTrace = utills.getStackTraceAsString(e);
+
+            CustomResponse<String> responseBody = new CustomResponse<>(stackTrace,
+                    "BAD_REQUEST",
+                    HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+            return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> assignBookToUser(HttpServletRequest req, HttpServletResponse res,
+            StudentBookDTO studentBookDTO) {
+        try {
+
+            Optional<BookEntity> getBookDetails = adminDAO.getBookById(studentBookDTO.getBookId());
+
+            Optional<UserEntity> getUserDetails = adminDAO.getUserByRollNumber(studentBookDTO.getRollNumber());
+
+            if (getBookDetails.get().getId().isEmpty() || getUserDetails.get().getId().isEmpty()) {
+                String errorMessage = "Book ID or User ID is required!";
+
+                CustomResponse<String> responseBody = new CustomResponse<>(errorMessage, "BAD_REQUEST",
+                        HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+            }
+
+            if (getBookDetails.get().getNoOfSets() <= 0) {
+                String errorMessage = "No sets available for the book";
+
+                CustomResponse<String> responseBody = new CustomResponse<>(errorMessage, "BAD_REQUEST",
+                        HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+            }
+
+            BookEntity bookEntity = getBookDetails.get();
+            bookEntity.setNoOfSets(getBookDetails.get().getNoOfSets() - 1);
+            bookEntity.setUpdatedAt(LocalDateTime.now());
+            bookEntity.setUpdatedBy(getUserDetails.get().getUuid());
+            adminDAO.updateBookDetails(bookEntity);
+            Optional<StudentBookEntity> checkBookAssigned = adminDAO.checkBookAssigned(getBookDetails.get().getId(),
+                    getUserDetails.get().getId());
+
+            if (checkBookAssigned.isEmpty()) {
+                StudentBookEntity studentBook = new StudentBookEntity();
+                studentBook.setBook(getBookDetails.get());
+                studentBook.setUser(getUserDetails.get());
+                studentBook.setStatus("Pending");
+                studentBook.setSubmissionDate(LocalDateTime.now().plusDays(10));
+                studentBook.setCreatedAt(LocalDateTime.now());
+                studentBook.setCreatedBy(getUserDetails.get().getUuid());
+                StudentBookEntity createStudentBook = adminDAO.createStudentBook(studentBook);
+
+                CustomResponse<?> responseBody = new CustomResponse<>(createStudentBook, "SUCCESS",
+                        HttpStatus.OK.value(),
+                        req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.OK);
+            } else if (checkBookAssigned.get().getStatus().equalsIgnoreCase("submited")) {
+                StudentBookEntity studentBook = checkBookAssigned.get();
+                studentBook.setStatus("Pending");
+                studentBook.setSubmissionDate(LocalDateTime.now().plusDays(10));
+                studentBook.setUpdatedAt(LocalDateTime.now());
+                studentBook.setUpdatedBy(getUserDetails.get().getUuid());
+
+                StudentBookEntity updateStudentBook = adminDAO.createStudentBook(studentBook);
+
+                CustomResponse<?> responseBody = new CustomResponse<>(updateStudentBook, "SUCCESS",
+                        HttpStatus.OK.value(),
+                        req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.OK);
+            } else {
+
+                StudentBookEntity studentBook = checkBookAssigned.get();
+                studentBook.setStatus("Submited");
+                studentBook.setSubmissionDate(LocalDateTime.now());
+                studentBook.setUpdatedAt(LocalDateTime.now());
+                studentBook.setUpdatedBy(getUserDetails.get().getUuid());
+
+                StudentBookEntity updateStudentBook = adminDAO.createStudentBook(studentBook);
+
+                CustomResponse<?> responseBody = new CustomResponse<>(updateStudentBook, "SUCCESS",
+                        HttpStatus.OK.value(),
+                        req.getRequestURI(), LocalDateTime.now());
+
+                return new ResponseEntity<>(responseBody, HttpStatus.OK);
+
+            }
+        } catch (Exception e) {
+
+            CustomResponse<String> responseBody = new CustomResponse<>(e.getMessage(),
+                    "BAD_REQUEST",
+                    HttpStatus.BAD_REQUEST.value(), req.getRequestURI(), LocalDateTime.now());
+            return new ResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
+        }
+    }
 }

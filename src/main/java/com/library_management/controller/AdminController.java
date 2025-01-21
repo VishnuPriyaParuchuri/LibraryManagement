@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.library_management.dto.BookServiceDTO;
+import com.library_management.dto.StudentBookDTO;
 import com.library_management.dto.UserInfoDTO;
 import com.library_management.dto.UserServiceDTO;
 import com.library_management.services.AdminService;
@@ -31,7 +33,7 @@ public class AdminController {
     public ResponseEntity<?> uploadBooksData(HttpServletRequest req, HttpServletResponse res,
             @RequestParam("file") MultipartFile file) {
 
-                UserInfoDTO userDetails = (UserInfoDTO) req.getAttribute("user");
+        UserInfoDTO userDetails = (UserInfoDTO) req.getAttribute("user");
 
         return adminService.uploadBooksData(req, res, file, userDetails);
     }
@@ -65,9 +67,47 @@ public class AdminController {
     public ResponseEntity<?> uploadUserData(HttpServletRequest req,
             HttpServletResponse res,
             @RequestParam("file") MultipartFile file) {
-
-        return adminService.uploadUsersData(req, res, file);
+        UserInfoDTO userDetails = (UserInfoDTO) req.getAttribute("user");
+        return adminService.uploadUsersData(req, res, file, userDetails);
     }
 
+    @GetMapping("/get/user/books")
+    @PreAuthorize("hasRole('ROLE_ADMIN')or hasRole('ROLE_STUDENT')")
+    public ResponseEntity<?> fetchUserBooksByUserId(HttpServletRequest req, HttpServletResponse res) {
+        UserInfoDTO userDetails = (UserInfoDTO) req.getAttribute("user");
 
+        return adminService.fetchUserBooksByUserId(req, res, userDetails);
+    }
+
+    @GetMapping("/user/book/id")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> fetchUserBooksByBookId(HttpServletRequest req, HttpServletResponse res,
+            @RequestBody BookServiceDTO bookServiceDTO, @RequestParam int page, @RequestParam int size) {
+
+        return adminService.fetchUserBooksByBookId(req, res, bookServiceDTO, page, size);
+    }
+
+    @PostMapping("/update/books/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> updateBooksByBookId(HttpServletRequest req, HttpServletResponse res,
+            @PathVariable("id") String id, @RequestBody BookServiceDTO bookServiceDTO) {
+
+        return adminService.updateBooksByBookId(req, res, id, bookServiceDTO);
+    }
+
+    @DeleteMapping("/delete/book/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> deleteBooksById(HttpServletRequest req, HttpServletResponse res,
+            @PathVariable("id") String id) {
+
+        return adminService.deleteBooksByBookId(req, res, id);
+    }
+
+    @PostMapping("/assign/book/user")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> assignBookToUser(HttpServletRequest req, HttpServletResponse res,
+            @RequestBody StudentBookDTO studentBookDTO) {
+
+        return adminService.assignBookToUser(req, res, studentBookDTO);
+    }
 }

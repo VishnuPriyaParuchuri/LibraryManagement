@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.library_management.dto.UserBookViewDTO;
 import com.library_management.entity.UserEntity;
 
 @Repository
@@ -21,5 +22,40 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
 
     @Query("SELECT u FROM UserEntity u WHERE u.email IN :emails")
     List<UserEntity> findUsersByEmails(@Param("emails") List<String> emails);
+
+    @Query(value = """
+            SELECT
+            id,
+            user_name,
+            email,
+            author,
+            book_name,
+            description,
+            no_of_sets,
+            submission_date,
+            status
+            FROM fetch_view_user_book
+            WHERE id = :id
+            """, nativeQuery = true)
+    List<UserBookViewDTO> findUserBooksById(@Param("id") String id);
+
+    @Query(value = """
+            SELECT
+            id,
+            user_name,
+            email,
+            bookId,
+            author,
+            book_name,
+            description,
+            no_of_sets,
+            submission_date,
+            status
+            FROM fetch_view_user_book
+            WHERE bookId = :bookId
+            """, nativeQuery = true)
+    Page<UserBookViewDTO> findUserBooksByBookId(@Param("bookId") String bookId, Pageable pageable);
+
+    public Optional<UserEntity> findByRollNo(String rollNumber);
 
 }
