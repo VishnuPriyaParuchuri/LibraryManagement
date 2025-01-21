@@ -6,9 +6,12 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import com.library_management.dto.BookServiceDTO;
+import com.library_management.dto.UserBookViewDTO;
 import com.library_management.dto.UserInfoDTO;
 import com.library_management.dto.UserServiceDTO;
 import com.library_management.entity.BookEntity;
+import com.library_management.entity.StudentBookEntity;
 import com.library_management.entity.UserEntity;
 
 public interface AdminDAO {
@@ -27,4 +30,21 @@ public interface AdminDAO {
 
     List<UserEntity> uploadUserInfo(List<UserEntity> users);
 
+    List<UserBookViewDTO> getUserBooksById(String id);
+
+    Page<UserBookViewDTO> getUserBooksInfoByBookId(String id, Pageable pageable);
+
+    BookServiceDTO updateBooksInfo(String id, BookServiceDTO bookServiceDTO);
+
+    Optional<BookEntity> deleteBookInfo(String id);
+
+    Optional<BookEntity> getBookById(String bookId);
+
+    Optional<UserEntity> getUserByRollNumber(String rollNumber);
+
+    BookEntity updateBookDetails(BookEntity bookEntity);
+
+    StudentBookEntity createStudentBook(StudentBookEntity studentBook);
+
+    public Optional<StudentBookEntity> checkBookAssigned(String bookId, String userId);
 }
